@@ -6,6 +6,7 @@ import {
 	Grid,
 	Menu,
 	MenuItem,
+	Paper,
 	TextField,
 	Typography,
 } from "@mui/material";
@@ -46,6 +47,13 @@ import { useEffect } from "react";
 
 function Home() {
 	const [queryText, setQueryText] = useState("");
+	const [suggestionList, setSuggestionList] = useState([]);
+	useEffect(() => {
+		if (queryText == "") {
+			setSuggestionList([]);
+		}
+	}, [queryText]);
+
 	const {
 		transcript,
 		listening,
@@ -83,32 +91,22 @@ function Home() {
 			.then((response) => response.json())
 			.then((data) => {
 				var li = data["hits"]["hits"];
-				console.log(data);
-				setResults(li);
+				var parsedList = [];
+				for (var i = 0; i < li.length; i++) {
+					var id = li[i]["_id"];
+					var raw = li[i]["_source"]["raw_text"];
+					var queryText = li[i]["_source"]["queryText"];
+					parsedList.push({
+						id: id,
+						raw_text: raw,
+						textString: queryText,
+					});
+				}
+
+				setResults(parsedList);
 			});
 	};
-	const items = [
-		{
-			id: 0,
-			name: "Cobol",
-		},
-		{
-			id: 1,
-			name: "JavaScript",
-		},
-		{
-			id: 2,
-			name: "Basic",
-		},
-		{
-			id: 3,
-			name: "PHP",
-		},
-		{
-			id: 4,
-			name: "Java",
-		},
-	];
+
 	const handleOnSearch = (string, results) => {
 		console.log(string, results);
 	};
@@ -218,9 +216,69 @@ function Home() {
 									style={{ width: "500px" }}
 									value={queryText}
 									onChange={(event) => {
-										setQueryText(event.target.value);
+										var str = event.target.value;
+										if (str == "") {
+											setSuggestionList([]);
+										}
+										if (str.slice(str.length - 1) == " ") {
+											setSuggestionList([]);
+											const requestOptions = {
+												method: "POST",
+												headers: {
+													"Content-Type":
+														"application/json",
+													"Access-Control-Allow-Origin":
+														"*",
+												},
+												body: JSON.stringify({
+													queryString: queryText,
+												}),
+											};
+											fetch(
+												"http://127.0.0.1:8000/searchQuery",
+												requestOptions
+											)
+												.then((response) =>
+													response.json()
+												)
+												.then((data) => {
+													console.log(data);
+
+													var li = data;
+													setSuggestionList(li);
+												});
+										}
+										setQueryText(str);
 									}}
 								/>
+								{suggestionList != [] && (
+									<Paper>
+										{suggestionList.map((val, index) => {
+											return (
+												<Typography
+													onClick={() => {
+														setQueryText(
+															queryText +
+																val.nextWords.join(
+																	" "
+																)
+														);
+														setSuggestionList([]);
+													}}
+													style={{
+														paddingLeft: "10px",
+														cursor: "pointer",
+													}}
+													key={index}
+													variant="h6"
+													component="h6">
+													{queryText +
+														val.nextWords.join(" ")}
+												</Typography>
+											);
+										})}
+									</Paper>
+								)}
 							</Grid>
 							<Grid item>
 								<Button
@@ -243,7 +301,7 @@ function Home() {
 										)
 											.then((response) => response.json())
 											.then((data) => {
-												var li = data["hits"]["hits"];
+												var li = data;
 												console.log(li);
 												setResults(li);
 											});
@@ -297,12 +355,12 @@ function Home() {
 							return (
 								<ResultCard
 									key={index}
-									id={data["_id"]}
-									heading={data["_source"]["queryText"]
+									id={data["id"]}
+									heading={data["textString"]
 										.split(" ")
 										.splice(0, 10)
 										.join(" ")}
-									subtext={data["_source"]["queryText"]
+									subtext={data["textString"]
 										.split(" ")
 										.splice(10, 70)
 										.join(" ")}

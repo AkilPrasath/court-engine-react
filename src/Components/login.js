@@ -34,7 +34,6 @@ const Login = ({ handleChange }) => {
 	const validationSchema = Yup.object().shape({
 		email: Yup.string().email("Enter valid email").required("Required"),
 		password: Yup.string().required("Required"),
-		// remember: Yup.string().oneOf(["true"], "Accept terms & conditions")
 	});
 
 	const NavTo = () => {

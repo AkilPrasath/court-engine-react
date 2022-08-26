@@ -31,7 +31,6 @@ const Signup = () => {
 		phoneNumber: "",
 		password: "",
 		confirmPassword: "",
-		termsAndConditions: false,
 	};
 
 	const validationSchema = Yup.object().shape({
@@ -46,10 +45,6 @@ const Signup = () => {
 		confirmPassword: Yup.string()
 			.oneOf([Yup.ref("password")], "Password not matched")
 			.required("Required"),
-		termsAndConditions: Yup.string().oneOf(
-			["true"],
-			"Accept terms & conditions"
-		),
 	});
 
 	const NavTo = () => {
@@ -161,20 +156,7 @@ const Signup = () => {
 							/>
 							<br></br>
 							<br></br>
-							<FormControlLabel
-								control={
-									<Field
-										as={Checkbox}
-										name="termsAndConditions"
-									/>
-								}
-								label="I accept the terms and conditions."
-							/>
-							<br></br>
-							<br></br>
-							<FormHelperText>
-								<ErrorMessage name="termsAndConditions" />
-							</FormHelperText>
+
 							<Button
 								type="submit"
 								variant="contained"
