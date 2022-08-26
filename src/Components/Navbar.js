@@ -169,6 +169,8 @@ function Navbar({ filterMap, setMap, callSearchApi, ...props }) {
 						variant="text"
 						onClick={() => {
 							setPet("");
+							setStartYear("");
+							setEndYear("");
 							setRes("");
 							setSection("");
 							setjudgementNumber("");
@@ -199,10 +201,10 @@ function Navbar({ filterMap, setMap, callSearchApi, ...props }) {
 									"supreme court",
 								];
 							} else {
-								filterMap["court"] = courtRadio;
+								filterMap["court"] = [courtRadio];
 							}
 							filterMap["highCourtLocation"] = highCourtCity;
-							filterMap["judgementNumber"] = judgementNumber;
+							filterMap["JudgementNumber"] = judgementNumber;
 
 							setMap(filterMap);
 							callSearchApi();
